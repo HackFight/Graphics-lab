@@ -4,6 +4,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 
 class Shader
 {
@@ -27,7 +28,11 @@ public:
 	void SetUniform3f(const std::string& name, float v0, float v1, float v2);
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 
-	void SetUniformMatrix4fv(const std::string& name, GLfloat* value);
+	void SetUniform2fv(const std::string& name, glm::vec2 value);
+	void SetUniform3fv(const std::string& name, glm::vec3 value);
+	void SetUniform4fv(const std::string& name, glm::vec4 value);
+
+	void SetUniformMatrix4fv(const std::string& name, glm::mat4 value);
 
 private:
 	GLint GetUniformLocation(const std::string& name);

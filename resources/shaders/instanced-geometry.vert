@@ -1,15 +1,22 @@
 #version 430
 
-in layout(location=0) vec3 aPosition;
-in layout(location=1) vec3 aColor;
-in layout(location=2) mat4 aModel;
+in layout(location=0) vec3 aPos;
+in layout(location=1) vec3 aNorm;
+in layout(location=2) vec3 aColor;
+in layout(location=3) mat4 aModel;
 
-uniform mat4 worldToClip;
+uniform mat4 proj;
+uniform mat4 view;
 
-out vec3 fColor;
+out vec3 Normal;
+out vec3 Color;
+out vec3 FragPos;
 
 void main()
 {
-	gl_Position = worldToClip * aModel * vec4(aPosition, 1.0f);
-	fColor = aColor;
+	gl_Position = proj * view * aModel * vec4(aPos, 1.0f);
+	
+	Normal = aNorm;
+	Color = aColor;
+	FragPos = vec3(aModel * vec4(aPos, 1.0));
 }

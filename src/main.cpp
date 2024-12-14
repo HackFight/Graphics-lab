@@ -14,21 +14,27 @@
 #include <primitives/vbo.h>
 #include <primitives/ebo.h>
 #include <primitives/vao.h>
-#include <shapeGenerator.h>
+#include <primitives/shapeGenerator.h>
+#include <primitives/shader.h>
 #include <camera.h>
-#include <shader.h>
 
 //##### - GENERAL VARIABLES - #####//
 GLuint programID;
 Camera camera;
 const float cameraSpeed = 2.5f; // adjust accordingly
 
+glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+
 glm::mat4 clip = glm::mat4(1.0f);
 glm::mat4 proj = glm::mat4(1.0f);
 glm::mat4 view = glm::mat4(1.0f);
-glm::mat4 model = glm::mat4(1.0f);
+glm::mat4 modelToClip = glm::mat4(1.0f);
+glm::mat4 model1 = glm::mat4(1.0f);
+glm::mat4 model2 = glm::mat4(1.0f);
 
-int winWidth = 0, winHeight = 0;
+int winWidth = 640, winHeight = 480;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -43,7 +49,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 
 static void error_callback(int error, const char* description)
 {
-	std::cout << "[OpenGL Error]:" << description << "\n";
+	std::cout << "[OpenGL Error]: " << description << "\n";
 }
 
 void processInput(GLFWwindow* window)
@@ -81,7 +87,7 @@ int main(void)
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 #endif
 
-	GLFWwindow* window = glfwCreateWindow(640, 480, "Instancing", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(winWidth, winHeight, "Lighting", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -103,58 +109,65 @@ int main(void)
 #pragma endregion
 
 	{
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetCursorPosCallback(window, mouse_callback);
+
+
 		//##### - DATA - #####//
 		ShapeData cube = ShapeGenerator::MakeCube();
 
 		VAO vao;
 		VBO vbo(cube.GetVertexBufferSize(), cube.vertices);
-		VBOLayout vboLpc;
-		vboLpc.Push<GLfloat>(3);	//Set position attrib
-		vboLpc.Push<GLfloat>(3);	//Set color attrib
+		VBOLayout vboL;
+		vboL.Push<GLfloat>(3);	//Set position attrib
+		vboL.Push<GLfloat>(3);	//Set normals attrib
+		vboL.Push<GLfloat>(3);	//Set color attrib
 
-		vao.AddBuffer(vbo, vboLpc, 0);
+		vao.AddBuffer(vbo, vboL, 0);
 
 		EBO ebo(cube.GetIndexBufferSize(), cube.indices);
-
-		glm::mat4 modelMatrices[] =
-		{
-			glm::translate(glm::mat4(1.0f), glm::vec3(3.0f, 0.0f, 0.0f)),
-			glm::translate(glm::mat4(1.0f), glm::vec3(-3.0f, 0.0f, 0.0f))
-		};
-
-		VBO modelMatrixBuffer(sizeof(modelMatrices), modelMatrices);
-		VBOLayout vboLm;
-		vboLm.Push<GLfloat>(4);	//Set first vec4 of model matrix attrib
-		vboLm.Push<GLfloat>(4);	//Set second vec4 of model matrix attrib
-		vboLm.Push<GLfloat>(4);	//Set third vec4 of model matrix attrib
-		vboLm.Push<GLfloat>(4);	//Set fourth vec4 of model matrix attrib
-		glVertexAttribDivisor(2, 1);
-		glVertexAttribDivisor(3, 1);
-		glVertexAttribDivisor(4, 1);
-		glVertexAttribDivisor(5, 1);
-
-		vao.AddBuffer(modelMatrixBuffer, vboLm, 2);
 
 
 
 		//##### - SHADERS - #####//
-		Shader shader(RESOURCES_PATH "shaders/instanced-geometry.vert", RESOURCES_PATH "shaders/default.frag");
+		Shader light(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/color.frag");
+		Shader reciever(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
 
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-		glfwSetCursorPosCallback(window, mouse_callback);
 
 
 		//##### - CLEANING - #####//
 		cube.CleanUp();
+
 		vao.Unbind();
 		vbo.Unbind();
 		ebo.Unbind();
-		shader.Unbind();
+
+		light.Unbind();
+		reciever.Unbind();
 
 
 
 		//##### - LOCAL CONSTANTS - #####//
 		camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
+
+		model1 = glm::mat4(1.0f);
+
+		model2 = glm::translate(model2, lightPos);
+		model2 = glm::scale(model2, glm::vec3(0.1f, 0.1f, 0.1f));
+
+		//##### - CONSTANT UNIFORMS - #####//
+		reciever.Bind();
+		reciever.SetUniform3fv("lightPos", lightPos);
+		reciever.SetUniform3fv("material.ambient", objectColor);
+		reciever.SetUniform3fv("material.diffuse", objectColor);
+		reciever.SetUniform3f("material.specular", 0.5f, 0.5f, 0.5f);
+		reciever.SetUniform1f("material.shininess", 32.0f);
+		reciever.SetUniform3fv("light.ambient", lightColor * 0.2f);
+		reciever.SetUniform3fv("light.diffuse", lightColor * 0.5f);
+		reciever.SetUniform3fv("light.specular", lightColor * 1.0f);
+
+		light.Bind();
+		light.SetUniform3fv("color", lightColor);
 
 
 
@@ -174,17 +187,32 @@ int main(void)
 			processInput(window);
 
 			//##### - Matrices
-			proj = glm::perspective(90.0f, (float)winWidth / (float)winHeight, 0.1f, 10.0f);
+			proj = glm::perspective(glm::radians(70.0f), (float)winWidth / (float)winHeight, 0.1f, 100.0f);
 			view = camera.GetWorldToViewMatrix();
-			glm::mat4 worldToClip = proj * view;
 
+			//##### - Uniforms
+			reciever.Bind();
+			reciever.SetUniformMatrix4fv("proj", proj);
+			reciever.SetUniformMatrix4fv("view", view);
+			reciever.SetUniformMatrix4fv("model", model1);
+			reciever.SetUniform3fv("viewPos", camera.position);
+
+			light.Bind();
+			light.SetUniformMatrix4fv("proj", proj);
+			light.SetUniformMatrix4fv("view", view);
+			light.SetUniformMatrix4fv("model", model2);
+			light.SetUniform3fv("color", lightColor);
 
 			//##### - Rendering
 			vao.Bind();
-			shader.Bind();
-			shader.SetUniformMatrix4fv("worldToClip", &worldToClip[0][0]);
 
-			glDrawElementsInstanced(GL_TRIANGLES, ebo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0, 2);
+			reciever.Bind();
+			glDrawElements(GL_TRIANGLES, ebo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+			light.Bind();
+			glDrawElements(GL_TRIANGLES, ebo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+			//##### - Debug
 
 
 			//Loop end

@@ -1,4 +1,4 @@
-#include "shader.h"
+#include "primitives/shader.h"
 
 Shader::Shader(const char* vertexFilepath, const char* fragmentFilepath)
 	: m_vertexFilepath(vertexFilepath), m_fragmentFilepath(fragmentFilepath), m_rendererID(0)
@@ -96,7 +96,22 @@ void Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2,
 	glUniform4f(GetUniformLocation(name), v0, v1, v2 ,v3);
 }
 
-void Shader::SetUniformMatrix4fv(const std::string& name, GLfloat* value)
+void Shader::SetUniformMatrix4fv(const std::string& name, glm::mat4 value)
 {
-	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, value);
+	glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+}
+
+void Shader::SetUniform2fv(const std::string& name, glm::vec2 value)
+{
+	glUniform2f(GetUniformLocation(name), value.x, value.y);
+}
+
+void Shader::SetUniform3fv(const std::string& name, glm::vec3 value)
+{
+	glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
+}
+
+void Shader::SetUniform4fv(const std::string& name, glm::vec4 value)
+{
+	glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
 }

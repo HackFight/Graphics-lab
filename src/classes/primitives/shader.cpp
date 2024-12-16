@@ -3,29 +3,11 @@
 Shader::Shader(const char* vertexFilepath, const char* fragmentFilepath)
 	: m_vertexFilepath(vertexFilepath), m_fragmentFilepath(fragmentFilepath), m_rendererID(0)
 {
-	std::string vertexCode = get_file_contents(vertexFilepath);
-	std::string fragmentCode = get_file_contents(fragmentFilepath);
+	MakeShaderSource(vertexFilepath, fragmentFilepath);
 
-	const char* vertexSource = vertexCode.c_str();
-	const char* fragmentSource = fragmentCode.c_str();
+	m_rendererID = CompileShader();
 
-	GLuint vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
-
-	glShaderSource(vertexShaderID, 1, &vertexSource, NULL);
-	glShaderSource(fragmentShaderID, 1, &fragmentSource, NULL);
-
-	glCompileShader(vertexShaderID);
-	glCompileShader(fragmentShaderID);
-
-	m_rendererID = glCreateProgram();
-
-	glAttachShader(m_rendererID, vertexShaderID);
-	glAttachShader(m_rendererID, fragmentShaderID);
-	glLinkProgram(m_rendererID);
-
-	glDeleteShader(vertexShaderID);
-	glDeleteShader(fragmentShaderID);
+	LinkShader();
 }
 
 Shader::~Shader()
@@ -33,7 +15,50 @@ Shader::~Shader()
 	glDeleteProgram(m_rendererID);
 }
 
-GLint Shader::GetUniformLocation(const std::string& name)
+void Shader::Bind() const
+{
+	glUseProgram(m_rendererID);
+}
+
+void Shader::Unbind() const
+{
+	glUseProgram(0);
+}
+
+void Shader::MakeShaderSource(const char* vertexFilepath, const char* fragmentFilepath)
+{
+	std::string vertexCode = get_file_contents(vertexFilepath);
+	std::string fragmentCode = get_file_contents(fragmentFilepath);
+
+	const char* vertexSource = vertexCode.c_str();
+	const char* fragmentSource = fragmentCode.c_str();
+
+	m_vertexShaderID = glCreateShader(GL_VERTEX_SHADER);
+	m_fragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
+
+	glShaderSource(m_vertexShaderID, 1, &vertexSource, NULL);
+	glShaderSource(m_fragmentShaderID, 1, &fragmentSource, NULL);
+}
+
+GLuint Shader::CompileShader()
+{
+	glCompileShader(m_vertexShaderID);
+	glCompileShader(m_fragmentShaderID);
+
+	return glCreateProgram();
+}
+
+void Shader::LinkShader()
+{
+	glAttachShader(m_rendererID, m_vertexShaderID);
+	glAttachShader(m_rendererID, m_fragmentShaderID);
+	glLinkProgram(m_rendererID);
+
+	glDeleteShader(m_vertexShaderID);
+	glDeleteShader(m_fragmentShaderID);
+}
+
+GLint Shader::GetUniformLocation(const std::string& name) 
 {
 	if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
 	{
@@ -50,7 +75,7 @@ GLint Shader::GetUniformLocation(const std::string& name)
 	return location;
 }
 
-std::string Shader::get_file_contents(const char* filename)
+std::string Shader::get_file_contents(const char* filename) const
 {
 	std::ifstream in(filename, std::ios::binary);
 	if (in)
@@ -64,16 +89,6 @@ std::string Shader::get_file_contents(const char* filename)
 		return(contents);
 	}
 	throw(errno);
-}
-
-void Shader::Bind() const
-{
-	glUseProgram(m_rendererID);
-}
-
-void Shader::Unbind() const
-{
-	glUseProgram(0);
 }
 
 void Shader::SetUniform1f(const std::string& name, float value)

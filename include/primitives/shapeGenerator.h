@@ -10,6 +10,7 @@ public:
 	static ShapeData MakeTriangle();
 	static ShapeData MakeSquare();
 	static ShapeData MakeCube();
+	static ShapeData MakePlane(unsigned int divisions, float width);
 };
 
 #endif

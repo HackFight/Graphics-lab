@@ -6,10 +6,19 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+struct ShaderSource
+{
+	GLuint vertexShaderID;
+	GLuint fragmentShaderID;
+};
+
 class Shader
 {
 private:
 	GLuint m_rendererID;
+
+	GLuint m_vertexShaderID;
+	GLuint m_fragmentShaderID;
 
 	std::string m_vertexFilepath;
 	std::string m_fragmentFilepath;
@@ -35,8 +44,12 @@ public:
 	void SetUniformMatrix4fv(const std::string& name, glm::mat4 value);
 
 private:
+	void MakeShaderSource(const char* vertexFilepath, const char* fragmentFilepath);
+	GLuint CompileShader();
+	void LinkShader();
+
 	GLint GetUniformLocation(const std::string& name);
-	std::string get_file_contents(const char* filename);
+	std::string get_file_contents(const char* filename) const;
 };
 
 #endif

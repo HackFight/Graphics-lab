@@ -7,9 +7,9 @@ ShapeData ShapeGenerator::MakeTriangle()
 
 	Vertex verts[] =
 	{
-		glm::vec3( 0.0f,  1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(-1.0f, -1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3( 1.0f, -1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec2(0.5f,  0.5f), glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3( 1.0f, -1.0f, 0.0f), glm::vec2(1.0f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
 	};
 	ret.numVertices = NUM_ARRAY_ELEMENTS(verts);
 	ret.vertices = new Vertex[ret.numVertices];
@@ -29,10 +29,10 @@ ShapeData ShapeGenerator::MakeSquare()
 
 	Vertex verts[] =
 	{
-		glm::vec3(-1.0f,  -1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3( 1.0f,  -1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3( 1.0f,   1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(-1.0f,   1.0f, 0.0f),	glm::vec3(0.0f, 0.0f, -1.0f),	glm::vec3(1.0f, 1.0f, 1.0f),
+		glm::vec3(-1.0f,  -1.0f, 0.0f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),	glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3( 1.0f,  -1.0f, 0.0f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),	glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3( 1.0f,   1.0f, 0.0f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),	glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(-1.0f,   1.0f, 0.0f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f),	glm::vec3(1.0f, 1.0f, 1.0f),
 	};
 	ret.numVertices = NUM_ARRAY_ELEMENTS(verts);
 	ret.vertices = new Vertex[ret.numVertices];
@@ -56,35 +56,35 @@ ShapeData ShapeGenerator::MakeCube()
 
 	Vertex verts[] =
 	{
-		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),	//Front face
-		glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
-		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),	//Front face
+		glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 0.0f, 0.0f),
 
-		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),	//Back face
-		glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
-		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),	//Back face
+		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec2(1.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec2(0.0f, 1.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, 1.0f, 0.0f),
 
-		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),	//Left face
-		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
-		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),	//Left face
+		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec2(1.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec2(1.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec2(0.0f, 1.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f),
 
-		glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),	//Right face
-		glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
-		glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
-		glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
+		glm::vec3(0.5f, -0.5f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),	//Right face
+		glm::vec3(0.5f,  0.5f,  0.5f), glm::vec2(1.0f, 0.0f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
+		glm::vec3(0.5f,  0.5f, -0.5f), glm::vec2(1.0f, 1.0f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
+		glm::vec3(0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 1.0f), glm::vec3( 1.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 0.0f),
 
-		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),	//Bottom face
-		glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
-		glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
-		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
+		glm::vec3(-0.5f, -0.5f, -0.5f), glm::vec2(0.0f, 0.0f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),	//Bottom face
+		glm::vec3( 0.5f, -0.5f, -0.5f), glm::vec2(1.0f, 0.0f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
+		glm::vec3( 0.5f, -0.5f,  0.5f), glm::vec2(1.0f, 1.0f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
+		glm::vec3(-0.5f, -0.5f,  0.5f), glm::vec2(0.0f, 1.0f), glm::vec3( 0.0f, -1.0f, 0.0f), glm::vec3(1.0f, 0.0f, 1.0f),
 
-		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),	//Top face
-		glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),
-		glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),
-		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f)
+		glm::vec3(-0.5f,  0.5f,  0.5f), glm::vec2(0.0f, 0.0f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),	//Top face
+		glm::vec3( 0.5f,  0.5f,  0.5f), glm::vec2(1.0f, 0.0f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),
+		glm::vec3( 0.5f,  0.5f, -0.5f), glm::vec2(1.0f, 1.0f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f),
+		glm::vec3(-0.5f,  0.5f, -0.5f), glm::vec2(0.0f, 1.0f), glm::vec3( 0.0f,  1.0f, 0.0f), glm::vec3(0.0f, 1.0f, 1.0f)
 	};
 	ret.numVertices = NUM_ARRAY_ELEMENTS(verts);
 	ret.vertices = new Vertex[ret.numVertices];
@@ -134,6 +134,7 @@ ShapeData ShapeGenerator::MakePlane(unsigned int divisions, float width)
 			Vertex& vert = ret.vertices[y * (divisions + 1) + x];
 			glm::vec3 pos = glm::vec3(x * triSide - width / 2.0f, 0.0f, y * -triSide + width / 2.0f);
 			vert.position = pos;
+			vert.uv = glm::vec2((float)x / (float)(divisions + 1), (float)y / (float)(divisions + 1));
 			vert.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 			vert.color = glm::vec3((float)x / (float)(divisions + 1), 1.0f, (float)y / (float)(divisions + 1));
 		}

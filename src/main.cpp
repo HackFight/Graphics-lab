@@ -28,8 +28,12 @@ GLuint programID;
 Camera camera;
 const float cameraSpeed = 2.5f; // adjust accordingly
 
-glm::vec3 objectColor = glm::vec3(1.0f, 0.5f, 0.31f);
-glm::vec3 objectPos = glm::vec3(0.0f, 0.5f, 0.0f);
+glm::vec3 cubeColor = glm::vec3(1.0f, 0.5f, 0.31f);
+glm::vec3 cubePos = glm::vec3(0.0f, 0.5f, 0.0f);
+
+glm::vec3 planeColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 planePos = glm::vec3(0.0f, 0.0f, 0.0f);
+
 glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
 
@@ -41,20 +45,24 @@ glm::mat4 model1 = glm::mat4(1.0f);
 glm::mat4 model2 = glm::mat4(1.0f);
 glm::mat4 model3 = glm::mat4(1.0f);
 
+int current_item = 2;
+
 int winWidth = 640, winHeight = 480;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 bool wireframe = false;
-bool menu = false;
+bool cursorReleased = false;
 bool escReleased = true;
-
 
 //##### - FUNCTIONS - #####//
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-	camera.UpdateMouse(glm::vec2(xpos, ypos));
+	if(!cursorReleased)
+		camera.UpdateMouse(glm::vec2(xpos, ypos));
+
+	ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 }
 
 static void error_callback(int error, const char* description)
@@ -79,17 +87,15 @@ void processInput(GLFWwindow* window)
 		if (escReleased)
 		{
 			escReleased = false;
-			if (menu)
+			if (cursorReleased)
 			{
-				menu = false;
+				cursorReleased = false;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				glfwSetCursorPosCallback(window, mouse_callback);
 			}
 			else
 			{
-				menu = true;
+				cursorReleased = true;
 				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				glfwSetCursorPosCallback(window, NULL);
 			}
 		}
 	}
@@ -146,8 +152,8 @@ int main(void)
 	//ImGui::StyleColorsDark();				//you can use whatever imgui theme you like!
 	//imguiThemes::yellow();
 	//imguiThemes::gray();
-	//imguiThemes::green();
-	imguiThemes::red();
+	imguiThemes::green();
+	//imguiThemes::red();
 	//imguiThemes::embraceTheDarkness();
 
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -158,7 +164,7 @@ int main(void)
 	//io.ConfigViewportsNoAutoMerge = true;
 	//io.ConfigViewportsNoTaskBarIcon = true;
 
-	io.FontGlobalScale = 2.0f; //make text bigger please!
+	io.FontGlobalScale = 1.0f; //make text bigger please!
 
 	ImGuiStyle& style = ImGui::GetStyle();
 	if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -179,34 +185,36 @@ int main(void)
 
 
 		//##### - DATA - #####//
-		//##### - Cube
-		ShapeData cube = ShapeGenerator::MakeCube();
+		//##### - Square
+		ShapeData square = ShapeGenerator::MakeSquare();
 
-		VAO cubeVao;
-		VBO cubeVbo(cube.GetVertexBufferSize(), cube.vertices);
-		VBOLayout cubeVboL;
-		cubeVboL.Push<GLfloat>(3);	//Set position attrib
-		cubeVboL.Push<GLfloat>(3);	//Set normals attrib
-		cubeVboL.Push<GLfloat>(3);	//Set color attrib
+		VAO squareVao;
+		VBO squareVbo(square.GetVertexBufferSize(), square.vertices);
+		VBOLayout squareVboL;
+		squareVboL.Push<GLfloat>(3);	//Set position attrib
+		squareVboL.Push<GLfloat>(2);	//Set UV attrib
+		squareVboL.Push<GLfloat>(3);	//Set normals attrib
+		squareVboL.Push<GLfloat>(3);	//Set color attrib
 
-		cubeVao.AddBuffer(cubeVbo, cubeVboL, 0);
+		squareVao.AddBuffer(squareVbo, squareVboL, 0);
 
-		EBO cubeEbo(cube.GetIndexBufferCount(), cube.indices);
+		EBO squareEbo(square.GetIndexBufferCount(), square.indices);
 
 		//##### - Cleanup
-		cube.CleanUp();
+		square.CleanUp();
 
-		cubeVao.Unbind();
-		cubeVbo.Unbind();
-		cubeEbo.Unbind();
+		squareVao.Unbind();
+		squareVbo.Unbind();
+		squareEbo.Unbind();
 
 		//##### - Plane
-		ShapeData plane = ShapeGenerator::MakePlane(3, 2.0f);
+		ShapeData plane = ShapeGenerator::MakePlane(100, 2.0f);
 
 		VAO planeVao;
 		VBO planeVbo(plane.GetVertexBufferSize(), plane.vertices);
 		VBOLayout planeVboL;
 		planeVboL.Push<GLfloat>(3);	//Set position attrib
+		planeVboL.Push<GLfloat>(2);	//Set UV attrib
 		planeVboL.Push<GLfloat>(3);	//Set normals attrib
 		planeVboL.Push<GLfloat>(3);	//Set color attrib
 
@@ -221,43 +229,53 @@ int main(void)
 		planeVbo.Unbind();
 		planeEbo.Unbind();
 
+		//##### - Cube
+		ShapeData cube = ShapeGenerator::MakeCube();
+
+		VAO cubeVao;
+		VBO cubeVbo(cube.GetVertexBufferSize(), cube.vertices);
+		VBOLayout cubeVboL;
+		cubeVboL.Push<GLfloat>(3);	//Set position attrib
+		cubeVboL.Push<GLfloat>(2);	//Set UV attrib
+		cubeVboL.Push<GLfloat>(3);	//Set normals attrib
+		cubeVboL.Push<GLfloat>(3);	//Set color attrib
+
+		cubeVao.AddBuffer(cubeVbo, cubeVboL, 0);
+
+		EBO cubeEbo(cube.GetIndexBufferCount(), cube.indices);
+
+		//##### - Cleanup
+		cube.CleanUp();
+
+		cubeVao.Unbind();
+		cubeVbo.Unbind();
+		cubeEbo.Unbind();
+
 
 
 		//##### - SHADERS - #####//
+		Shader debugColor(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/default.frag");
+		Shader UV(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/UV.frag");
 		Shader light(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/color.frag");
-		Shader reciever(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
-		Shader color(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/default.frag");
+		Shader phong(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
 
 		//##### - Cleanup
 		light.Unbind();
-		reciever.Unbind();
-		color.Unbind();
+		UV.Unbind();
+		phong.Unbind();
+		debugColor.Unbind();
 
 
 
 		//##### - LOCAL CONSTANTS - #####//
 		camera.position = glm::vec3(0.0f, 0.0f, 5.0f);
 
-		model1 = glm::translate(model1, objectPos);
+		model1 = glm::translate(model1, cubePos);
 
 		model2 = glm::translate(model2, lightPos);
 		model2 = glm::scale(model2, glm::vec3(0.1f, 0.1f, 0.1f));
 
-		//##### - CONSTANT UNIFORMS - #####//
-		reciever.Bind();
-		reciever.SetUniform3fv("lightPos", lightPos);
-		reciever.SetUniform3fv("material.ambient", objectColor);
-		reciever.SetUniform3fv("material.diffuse", objectColor);
-		reciever.SetUniform3f("material.specular", 0.5f, 0.5f, 0.5f);
-		reciever.SetUniform1f("material.shininess", 32.0f);
-		reciever.SetUniform3fv("light.ambient", lightColor * 0.2f);
-		reciever.SetUniform3fv("light.diffuse", lightColor * 0.5f);
-		reciever.SetUniform3fv("light.specular", lightColor * 1.0f);
-
-		light.Bind();
-		light.SetUniform3fv("color", lightColor);
-
-
+		model3 = glm::translate(model3, planePos);
 
 		// ### - Main loop - ### //
 		while (!glfwWindowShouldClose(window))
@@ -293,42 +311,96 @@ int main(void)
 			view = camera.GetWorldToViewMatrix();
 
 
-			//##### - Uniforms
-			reciever.Bind();
-			reciever.SetUniformMatrix4fv("proj", proj);
-			reciever.SetUniformMatrix4fv("view", view);
-			reciever.SetUniformMatrix4fv("model", model1);
-			reciever.SetUniform3fv("viewPos", camera.position);
-
-			light.Bind();
-			light.SetUniformMatrix4fv("proj", proj);
-			light.SetUniformMatrix4fv("view", view);
-			light.SetUniformMatrix4fv("model", model2);
-			light.SetUniform3fv("color", lightColor);
-
-			color.Bind();
-			color.SetUniformMatrix4fv("proj", proj);
-			color.SetUniformMatrix4fv("view", view);
-			color.SetUniformMatrix4fv("model", model3);
-
-
 			//##### - Rendering
-			cubeVao.Bind();
+			if (current_item == 0)
+			{
+				debugColor.Bind();
+				debugColor.SetUniformMatrix4fv("proj", proj);
+				debugColor.SetUniformMatrix4fv("view", view);
 
-			reciever.Bind();
-			glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				squareVao.Bind();
+				debugColor.SetUniformMatrix4fv("model", model1);
+				glDrawElements(GL_TRIANGLES, squareEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 
-			light.Bind();
-			glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				cubeVao.Bind();
+				debugColor.SetUniformMatrix4fv("model", model2);
+				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 
-			planeVao.Bind();
+				planeVao.Bind();
+				debugColor.SetUniformMatrix4fv("model", model3);
+				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+			}
+			else if (current_item == 1)
+			{
+				UV.Bind();
+				UV.SetUniformMatrix4fv("proj", proj);
+				UV.SetUniformMatrix4fv("view", view);
 
-			color.Bind();
-			glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				squareVao.Bind();
+				UV.SetUniformMatrix4fv("model", model1);
+				glDrawElements(GL_TRIANGLES, squareEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+				cubeVao.Bind();
+				UV.SetUniformMatrix4fv("model", model2);
+				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+				planeVao.Bind();
+				UV.SetUniformMatrix4fv("model", model3);
+				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+			}
+			else if (current_item == 2)
+			{
+				phong.Bind();
+				phong.SetUniformMatrix4fv("proj", proj);
+				phong.SetUniformMatrix4fv("view", view);
+				phong.SetUniform3fv("viewPos", camera.position);
+				phong.SetUniform3fv("light.position", lightPos);
+				phong.SetUniform3fv("light.ambient", lightColor * 0.2f);
+				phong.SetUniform3fv("light.diffuse", lightColor * 0.5f);
+				phong.SetUniform3fv("light.specular", lightColor * 1.0f);
+
+				squareVao.Bind();
+				phong.SetUniformMatrix4fv("model", model1);
+				phong.SetUniform3fv("material.ambient", cubeColor);
+				phong.SetUniform3fv("material.diffuse", cubeColor);
+				phong.SetUniform3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+				phong.SetUniform1f("material.shininess", 32.0f);
+				glDrawElements(GL_TRIANGLES, squareEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+				cubeVao.Bind();
+				light.Bind();
+				light.SetUniformMatrix4fv("proj", proj);
+				light.SetUniformMatrix4fv("view", view);
+				light.SetUniformMatrix4fv("model", model2);
+				light.SetUniform3fv("color", lightColor);
+				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+
+				phong.Bind();
+				planeVao.Bind();
+				phong.SetUniformMatrix4fv("model", model3);
+				phong.SetUniform3fv("material.ambient", planeColor);
+				phong.SetUniform3fv("material.diffuse", planeColor);
+				phong.SetUniform3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+				phong.SetUniform1f("material.shininess", 32.0f);
+				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+			}
 
 
 			//##### - Debug
+			const char* items[] =
+			{
+				"Debug",
+				"UV",
+				"Phong"
+			};
+
 			ImGui::Begin("Rendering");
+			ImGui::Text("Shaders");
+			ImGui::ListBox("Shader", &current_item, items, sizeof(items) / sizeof(*items), 4);
+			ImGui::Text("Lighting");
+			ImGui::ColorEdit3("Light color", &lightColor[0]);
+			ImGui::ColorEdit3("Cube color", &cubeColor[0]);
+			ImGui::Text("Miscellaneous");
 			ImGui::Checkbox("Wireframe", &wireframe);
 			ImGui::End();
 
@@ -358,6 +430,10 @@ int main(void)
 			glfwPollEvents();
 		}
 	}
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

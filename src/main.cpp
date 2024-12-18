@@ -22,6 +22,7 @@
 #include <primitives/vao.h>
 #include <primitives/shapeGenerator.h>
 #include <primitives/shader.h>
+#include <primitives/texture.h>
 #include <camera.h>
 
 //##### - GENERAL VARIABLES - #####//
@@ -29,7 +30,6 @@ GLuint programID;
 Camera camera;
 const float cameraSpeed = 2.5f; // adjust accordingly
 
-glm::vec3 cubeColor = glm::vec3(1.0f, 0.5f, 0.31f);
 glm::vec3 cubePos = glm::vec3(0.0f, 0.5f, 0.0f);
 
 glm::vec3 planeColor = glm::vec3(1.0f, 1.0f, 1.0f);
@@ -209,7 +209,7 @@ int main(void)
 		squareEbo.Unbind();
 
 		//##### - Plane
-		ShapeData plane = ShapeGenerator::MakePlane(100, 2.0f);
+		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
 
 		VAO planeVao;
 		VBO planeVbo(plane.GetVertexBufferSize(), plane.vertices);
@@ -265,44 +265,9 @@ int main(void)
 
 
 		//##### - Textures - #####//
-		//Color
-		GLuint colorTexture;
-		glGenTextures(1, &colorTexture);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, colorTexture);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		int imgWidth, imgHeight, numColCh;
-		unsigned char* imgBytes = stbi_load(RESOURCES_PATH "textures/container.png", &imgWidth, &imgHeight, &numColCh, 0);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBytes);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		stbi_image_free(imgBytes);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		//Specular
-		GLuint specularTexture;
-		glGenTextures(1, &specularTexture);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, specularTexture);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		imgBytes = stbi_load(RESOURCES_PATH "textures/container_specular.png", &imgWidth, &imgHeight, &numColCh, 0);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBytes);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		stbi_image_free(imgBytes);
-		glBindTexture(GL_TEXTURE_2D, 0);
+		Texture tColor(GL_TEXTURE0, RESOURCES_PATH "textures/container.png", GL_RGBA);
+		Texture tSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/container_specular.png", GL_RGBA);
+		Texture tEmission(GL_TEXTURE2, RESOURCES_PATH "textures/container_emission.png", GL_RGB);
 
 
 
@@ -311,6 +276,10 @@ int main(void)
 		sUV.Unbind();
 		sPhong.Unbind();
 		sDebugColor.Unbind();
+
+		tColor.Unbind();
+		tSpecular.Unbind();
+		tEmission.Unbind();
 
 
 
@@ -414,8 +383,7 @@ int main(void)
 
 				cubeVao.Bind();
 				sTexture.Bind();
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, colorTexture);
+				tColor.Bind();
 				sTexture.SetUniform1i("tex0", 0);
 				sTexture.SetUniformMatrix4fv("model", model1);
 				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
@@ -460,12 +428,12 @@ int main(void)
 
 				cubeVao.Bind();
 				sTexturePhong.Bind();
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, colorTexture);
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, specularTexture);
+				tColor.Bind();
+				tSpecular.Bind();
+				tEmission.Bind();
 				sTexturePhong.SetUniform1i("material.diffuse", 0);
 				sTexturePhong.SetUniform1i("material.specular", 1);
+				sTexturePhong.SetUniform1i("material.emission", 2);
 				sTexturePhong.SetUniform1f("material.shininess", 32.0f);
 				sTexturePhong.SetUniformMatrix4fv("model", model1);
 				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
@@ -502,7 +470,6 @@ int main(void)
 			ImGui::ListBox("Shader", &current_item, items, sizeof(items) / sizeof(*items), 4);
 			ImGui::Text("Lighting");
 			ImGui::ColorEdit3("Light color", &lightColor[0]);
-			ImGui::ColorEdit3("Cube color", &cubeColor[0]);
 			ImGui::Text("Miscellaneous");
 			ImGui::Checkbox("Wireframe", &wireframe);
 			ImGui::End();

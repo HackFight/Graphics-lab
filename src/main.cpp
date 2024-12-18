@@ -46,7 +46,7 @@ glm::mat4 model1 = glm::mat4(1.0f);
 glm::mat4 model2 = glm::mat4(1.0f);
 glm::mat4 model3 = glm::mat4(1.0f);
 
-int current_item = 2;
+int current_item = 3;
 
 int winWidth = 640, winHeight = 480;
 
@@ -260,14 +260,16 @@ int main(void)
 		Shader sLight(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/color.frag");
 		Shader sTexture(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texture.frag");
 		Shader sPhong(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
+		Shader sTexturePhong(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texturePhong.frag");
 
 
 
 		//##### - Textures - #####//
-		GLuint texture;
-		glGenTextures(1, &texture);
+		//Color
+		GLuint colorTexture;
+		glGenTextures(1, &colorTexture);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, colorTexture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -276,6 +278,25 @@ int main(void)
 
 		int imgWidth, imgHeight, numColCh;
 		unsigned char* imgBytes = stbi_load(RESOURCES_PATH "textures/container.png", &imgWidth, &imgHeight, &numColCh, 0);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBytes);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		stbi_image_free(imgBytes);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		//Specular
+		GLuint specularTexture;
+		glGenTextures(1, &specularTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, specularTexture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		imgBytes = stbi_load(RESOURCES_PATH "textures/container_specular.png", &imgWidth, &imgHeight, &numColCh, 0);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgBytes);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -394,7 +415,7 @@ int main(void)
 				cubeVao.Bind();
 				sTexture.Bind();
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, texture);
+				glBindTexture(GL_TEXTURE_2D, colorTexture);
 				sTexture.SetUniform1i("tex0", 0);
 				sTexture.SetUniformMatrix4fv("model", model1);
 				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
@@ -424,17 +445,29 @@ int main(void)
 				sPhong.SetUniform3fv("light.diffuse", lightColor * 0.5f);
 				sPhong.SetUniform3fv("light.specular", lightColor * 1.0f);
 
+				sTexturePhong.Bind();
+				sTexturePhong.SetUniformMatrix4fv("proj", proj);
+				sTexturePhong.SetUniformMatrix4fv("view", view);
+				sTexturePhong.SetUniform3fv("viewPos", camera.position);
+				sTexturePhong.SetUniform3fv("light.position", lightPos);
+				sTexturePhong.SetUniform3fv("light.ambient", lightColor * 0.2f);
+				sTexturePhong.SetUniform3fv("light.diffuse", lightColor * 0.5f);
+				sTexturePhong.SetUniform3fv("light.specular", lightColor * 1.0f);
+
 				sLight.Bind();
 				sLight.SetUniformMatrix4fv("proj", proj);
 				sLight.SetUniformMatrix4fv("view", view);
 
 				cubeVao.Bind();
-				sPhong.Bind();
-				sPhong.SetUniform3fv("material.ambient", cubeColor);
-				sPhong.SetUniform3fv("material.diffuse", cubeColor);
-				sPhong.SetUniform3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-				sPhong.SetUniform1f("material.shininess", 32.0f);
-				sPhong.SetUniformMatrix4fv("model", model1);
+				sTexturePhong.Bind();
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, colorTexture);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, specularTexture);
+				sTexturePhong.SetUniform1i("material.diffuse", 0);
+				sTexturePhong.SetUniform1i("material.specular", 1);
+				sTexturePhong.SetUniform1f("material.shininess", 32.0f);
+				sTexturePhong.SetUniformMatrix4fv("model", model1);
 				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 
 				sLight.Bind();

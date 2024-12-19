@@ -23,6 +23,8 @@
 #include <primitives/shapeGenerator.h>
 #include <primitives/shader.h>
 #include <primitives/texture.h>
+#include <primitives/materials.h>
+#include <renderer.h>
 #include <camera.h>
 
 //##### - GENERAL VARIABLES - #####//
@@ -185,6 +187,7 @@ int main(void)
 		glfwSetCursorPosCallback(window, mouse_callback);
 
 
+
 		//##### - DATA - #####//
 		//##### - Square
 		ShapeData square = ShapeGenerator::MakeSquare();
@@ -254,6 +257,11 @@ int main(void)
 
 
 
+		//##### - RENDERER - #####//
+		Renderer renderer;
+
+
+
 		//##### - SHADERS - #####//
 		Shader sDebugColor(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/default.frag");
 		Shader sUV(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/UV.frag");
@@ -268,6 +276,15 @@ int main(void)
 		Texture tColor(GL_TEXTURE0, RESOURCES_PATH "textures/container.png", GL_RGBA);
 		Texture tSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/container_specular.png", GL_RGBA);
 		Texture tEmission(GL_TEXTURE2, RESOURCES_PATH "textures/container_emission.png", GL_RGB);
+		
+		
+		
+		//##### - MATERIALS - #####//
+		PhongEmissionMaterial jinxCubeMat;
+		jinxCubeMat.shader = &sTexturePhong;
+		jinxCubeMat.colorTex = tColor.GetID();
+		jinxCubeMat.specularTex = tSpecular.GetID();
+		jinxCubeMat.emissionTex = tEmission.GetID();
 
 
 
@@ -299,8 +316,8 @@ int main(void)
 			//Loop start
 			glfwGetFramebufferSize(window, &winWidth, &winHeight);
 			glViewport(0, 0, winWidth, winHeight);
-			glClear(GL_COLOR_BUFFER_BIT);
-			glClear(GL_DEPTH_BUFFER_BIT);
+			renderer.Clear();
+			renderer.Update(winWidth, winHeight, camera);
 
 			if(wireframe)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -322,91 +339,22 @@ int main(void)
 			processInput(window);
 
 
-			//##### - Matrices
-			proj = glm::perspective(glm::radians(70.0f), (float)winWidth / (float)winHeight, 0.1f, 100.0f);
-			view = camera.GetWorldToViewMatrix();
-
-
 			//##### - Rendering
 			if (current_item == 0)
 			{
-				sDebugColor.Bind();
-				sDebugColor.SetUniformMatrix4fv("proj", proj);
-				sDebugColor.SetUniformMatrix4fv("view", view);
 
-				cubeVao.Bind();
-				sDebugColor.SetUniformMatrix4fv("model", model1);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				sDebugColor.SetUniformMatrix4fv("model", model2);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				planeVao.Bind();
-				sDebugColor.SetUniformMatrix4fv("model", model3);
-				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 			}
 			else if (current_item == 1)
 			{
-				sUV.Bind();
-				sUV.SetUniformMatrix4fv("proj", proj);
-				sUV.SetUniformMatrix4fv("view", view);
 
-				cubeVao.Bind();
-				sUV.SetUniformMatrix4fv("model", model1);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				sUV.SetUniformMatrix4fv("model", model2);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				planeVao.Bind();
-				sUV.SetUniformMatrix4fv("model", model3);
-				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 			}
 			else if (current_item == 2)
 			{
-				sTexture.Bind();
-				sTexture.SetUniformMatrix4fv("proj", proj);
-				sTexture.SetUniformMatrix4fv("view", view);
 
-				sLight.Bind();
-				sLight.SetUniformMatrix4fv("proj", proj);
-				sLight.SetUniformMatrix4fv("view", view);
-
-				sPhong.Bind();
-				sPhong.SetUniformMatrix4fv("proj", proj);
-				sPhong.SetUniformMatrix4fv("view", view);
-				sPhong.SetUniform3fv("viewPos", camera.position);
-				sPhong.SetUniform3fv("light.position", lightPos);
-				sPhong.SetUniform3fv("light.ambient", lightColor * 0.2f);
-				sPhong.SetUniform3fv("light.diffuse", lightColor * 0.5f);
-				sPhong.SetUniform3fv("light.specular", lightColor * 1.0f);
-
-				cubeVao.Bind();
-				sTexture.Bind();
-				tColor.Bind();
-				sTexture.SetUniform1i("tex0", 0);
-				sTexture.SetUniformMatrix4fv("model", model1);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				sLight.Bind();
-				sLight.SetUniform3fv("color", lightColor);
-				sLight.SetUniformMatrix4fv("model", model2);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
-
-				planeVao.Bind();
-				sPhong.Bind();
-				sPhong.SetUniform3fv("material.ambient", planeColor);
-				sPhong.SetUniform3fv("material.diffuse", planeColor);
-				sPhong.SetUniform3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-				sPhong.SetUniform1f("material.shininess", 32.0f);
-				sPhong.SetUniformMatrix4fv("model", model3);
-				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
 			}
 			else if (current_item == 3)
 			{
 				sPhong.Bind();
-				sPhong.SetUniformMatrix4fv("proj", proj);
-				sPhong.SetUniformMatrix4fv("view", view);
 				sPhong.SetUniform3fv("viewPos", camera.position);
 				sPhong.SetUniform3fv("light.position", lightPos);
 				sPhong.SetUniform3fv("light.ambient", lightColor * 0.2f);
@@ -414,45 +362,34 @@ int main(void)
 				sPhong.SetUniform3fv("light.specular", lightColor * 1.0f);
 
 				sTexturePhong.Bind();
-				sTexturePhong.SetUniformMatrix4fv("proj", proj);
-				sTexturePhong.SetUniformMatrix4fv("view", view);
 				sTexturePhong.SetUniform3fv("viewPos", camera.position);
 				sTexturePhong.SetUniform3fv("light.position", lightPos);
 				sTexturePhong.SetUniform3fv("light.ambient", lightColor * 0.2f);
 				sTexturePhong.SetUniform3fv("light.diffuse", lightColor * 0.5f);
 				sTexturePhong.SetUniform3fv("light.specular", lightColor * 1.0f);
 
-				sLight.Bind();
-				sLight.SetUniformMatrix4fv("proj", proj);
-				sLight.SetUniformMatrix4fv("view", view);
 
-				cubeVao.Bind();
-				sTexturePhong.Bind();
-				tColor.Bind();
-				tSpecular.Bind();
-				tEmission.Bind();
-				sTexturePhong.SetUniform1i("material.diffuse", 0);
-				sTexturePhong.SetUniform1i("material.specular", 1);
-				sTexturePhong.SetUniform1i("material.emission", 2);
-				sTexturePhong.SetUniform1f("material.shininess", 32.0f);
+				//Render jinx cube
+				jinxCubeMat.Bind();
 				sTexturePhong.SetUniformMatrix4fv("model", model1);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				renderer.DrawMaterial(cubeVao, cubeEbo, jinxCubeMat);
 
+
+				//Render light
 				sLight.Bind();
-				sLight.SetUniformMatrix4fv("proj", proj);
-				sLight.SetUniformMatrix4fv("view", view);
 				sLight.SetUniform3fv("color", lightColor);
 				sLight.SetUniformMatrix4fv("model", model2);
-				glDrawElements(GL_TRIANGLES, cubeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				renderer.Draw(cubeVao, cubeEbo, sLight);
 
-				planeVao.Bind();
+
+				//Render plane
 				sPhong.Bind();
 				sPhong.SetUniform3fv("material.ambient", planeColor);
 				sPhong.SetUniform3fv("material.diffuse", planeColor);
 				sPhong.SetUniform3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 				sPhong.SetUniform1f("material.shininess", 32.0f);
 				sPhong.SetUniformMatrix4fv("model", model3);
-				glDrawElements(GL_TRIANGLES, planeEbo.GetIndicesCount(), GL_UNSIGNED_SHORT, 0);
+				renderer.Draw(planeVao, planeEbo, sPhong);
 			}
 
 

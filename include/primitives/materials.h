@@ -10,12 +10,39 @@ public:
 	void Bind() const;
 };
 
-class PhongEmissionMaterial : public DefaultMaterial
+class UnlitMaterial : public DefaultMaterial
 {
 public:
-	GLuint colorTex;
-	GLuint specularTex;
-	GLuint emissionTex;
+	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+	void Bind() const;
+};
+
+class TextureMaterial : public DefaultMaterial
+{
+public:
+	GLuint textureID;
+
+	void Bind() const;
+};
+
+class PhongMaterial : public DefaultMaterial
+{
+public:
+	glm::vec3 diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
+	glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f);;
+	float shininess = 32.0f;
+
+	void Bind() const;
+};
+
+class PhongTextureMaterial : public DefaultMaterial
+{
+public:
+	GLuint colorTexID;
+	GLuint specularTexID;
+	GLuint emissionTexID;
+	float shininess = 32.0f;
 
 	void Bind() const;
 };

@@ -43,6 +43,8 @@ public:
 
 	void SetUniform1i(const std::string& name, int value);
 
+	void SetUniform1b(const std::string& name, bool value);
+
 	void SetUniformMatrix4fv(const std::string& name, glm::mat4 value);
 
 private:

@@ -31,7 +31,7 @@ struct PointLight {
     vec3 specular;
 };
 
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 1
 
 in vec2 UV;
 in vec3 Normal;

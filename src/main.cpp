@@ -43,7 +43,6 @@ struct PointLight
 };
 
 //##### - GENERAL VARIABLES - #####//
-GLuint programID;
 Camera camera;
 const float cameraSpeed = 2.5f; // adjust accordingly
 
@@ -52,10 +51,6 @@ glm::vec3 cubePos = glm::vec3(0.0f, 0.5f, 0.0f);
 glm::vec3 planeColor = glm::vec3(1.0f, 1.0f, 1.0f);
 glm::vec3 planePos = glm::vec3(0.0f, 0.0f, 0.0f);
 
-glm::mat4 clip = glm::mat4(1.0f);
-glm::mat4 proj = glm::mat4(1.0f);
-glm::mat4 view = glm::mat4(1.0f);
-glm::mat4 modelToClip = glm::mat4(1.0f);
 glm::mat4 model1 = glm::mat4(1.0f);
 glm::mat4 lightModel = glm::mat4(1.0f);
 glm::mat4 model3 = glm::mat4(1.0f);
@@ -72,7 +67,7 @@ bool wireframe = false;
 bool cursorReleased = false;
 bool escReleased = true;
 
-const unsigned int POINT_LIGHTS_NUMBER = 4;
+const unsigned int POINT_LIGHTS_NUMBER = 1;
 
 
 
@@ -290,9 +285,14 @@ int main(void)
 
 
 		//##### - TEXTURES - #####//
-		Texture tColor(GL_TEXTURE0, RESOURCES_PATH "textures/container.png", GL_RGBA);
-		Texture tSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/container_specular.png", GL_RGBA);
-		Texture tEmission(GL_TEXTURE2, RESOURCES_PATH "textures/container_emission.png", GL_RGB);
+		Texture tBlack(GL_TEXTURE2, RESOURCES_PATH "textures/black.png", GL_RGBA, true);
+
+		Texture tColor(GL_TEXTURE0, RESOURCES_PATH "textures/container.png", GL_RGBA, false);
+		Texture tSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/container_specular.png", GL_RGBA, false);
+		Texture tEmission(GL_TEXTURE2, RESOURCES_PATH "textures/container_emission.png", GL_RGB, false);
+
+		Texture tilesColor(GL_TEXTURE0, RESOURCES_PATH "textures/tiles.png", GL_RGBA, true);
+		Texture tilesSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/tiles_specular.png", GL_RGBA, true);
 		
 		
 		
@@ -303,15 +303,25 @@ int main(void)
 		jinxCubeMat.specularTexID = tSpecular.GetID();
 		jinxCubeMat.emissionTexID = tEmission.GetID();
 
+		PhongTextureMaterial tilesMat;
+		tilesMat.shader = &sTexturePhong;
+		tilesMat.colorTexID = tilesColor.GetID();
+		tilesMat.specularTexID = tilesSpecular.GetID();
+		tilesMat.emissionTexID = tBlack.GetID();
+
 		PhongMaterial groundMaterial;
 		groundMaterial.shader = &sPhong;
 		groundMaterial.diffuse = planeColor;
 
-		TextureMaterial containerMat;
-		containerMat.shader = &sTexture;
+		TextureMaterial containerTextureMat;
+		containerTextureMat.shader = &sTexture;
+
+		TextureMaterial tilesTextureMat;
+		tilesTextureMat.shader = &sTexture;
 
 		UnlitMaterial defaultMat;
 		defaultMat.shader = &sLight;
+		defaultMat.color = glm::vec3(1.0f, 0.0f, 1.0f);
 
 
 
@@ -330,7 +340,7 @@ int main(void)
 		//##### - LIGHTS - #####//
 		DirLight dirLight;
 		dirLight.enabled = false;
-		dirLight.direction = glm::vec3(6.0f, -5.0f, -3.0f);
+		dirLight.direction = glm::vec3(0.2f, -1.0f, -0.5f);
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
 		PointLight pointLights[POINT_LIGHTS_NUMBER];
@@ -436,21 +446,24 @@ int main(void)
 				//Set cube texture
 				if (current_texture == 0)
 				{
-					containerMat.textureID = tColor.GetID();
+					containerTextureMat.textureID = tColor.GetID();
+					tilesTextureMat.textureID = tilesColor.GetID();
 				}
 				else if (current_texture == 1)
 				{
-					containerMat.textureID = tSpecular.GetID();
+					containerTextureMat.textureID = tSpecular.GetID();
+					tilesTextureMat.textureID = tilesSpecular.GetID();
 				}
 				else if (current_texture == 2)
 				{
-					containerMat.textureID = tEmission.GetID();
+					containerTextureMat.textureID = tEmission.GetID();
+					tilesTextureMat.textureID = tBlack.GetID();
 				}
 
 				//Render cube
-				containerMat.Bind();
+				containerTextureMat.Bind();
 				sTexture.SetUniformMatrix4fv("model", model1);
-				renderer.DrawMaterial(cubeVao, cubeEbo, containerMat);
+				renderer.DrawMaterial(cubeVao, cubeEbo, containerTextureMat);
 
 				//Render lights
 				defaultMat.Bind();
@@ -467,8 +480,9 @@ int main(void)
 				}
 
 				//Render plane
-				sLight.SetUniformMatrix4fv("model", model3);
-				renderer.DrawMaterial(planeVao, planeEbo, defaultMat);
+				tilesTextureMat.Bind();
+				sTexture.SetUniformMatrix4fv("model", model3);
+				renderer.DrawMaterial(planeVao, planeEbo, tilesTextureMat);
 			}
 			else if (current_shader == 3)
 			{
@@ -538,9 +552,9 @@ int main(void)
 
 
 				//Render plane
-				groundMaterial.Bind();
-				sPhong.SetUniformMatrix4fv("model", model3);
-				renderer.DrawMaterial(planeVao, planeEbo, groundMaterial);
+				tilesMat.Bind();
+				sTexturePhong.SetUniformMatrix4fv("model", model3);
+				renderer.DrawMaterial(planeVao, planeEbo, tilesMat);
 			}
 
 

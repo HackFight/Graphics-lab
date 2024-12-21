@@ -134,7 +134,7 @@ ShapeData ShapeGenerator::MakePlane(unsigned int divisions, float width)
 			Vertex& vert = ret.vertices[y * (divisions + 1) + x];
 			glm::vec3 pos = glm::vec3(x * triSide - width / 2.0f, 0.0f, y * -triSide + width / 2.0f);
 			vert.position = pos;
-			vert.uv = glm::vec2((float)x / (float)(divisions + 1), (float)y / (float)(divisions + 1));
+			vert.uv = glm::vec2((float)x, (float)y);
 			vert.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 			vert.color = glm::vec3((float)x / (float)(divisions + 1), 1.0f, (float)y / (float)(divisions + 1));
 		}

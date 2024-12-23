@@ -10,7 +10,9 @@ private:
 	GLenum m_texture;
 
 public:
-	Texture(GLenum texture, const char* filepath, GLenum format, bool nearest);
+	const char* m_type;
+
+	Texture(GLenum texture, const char* type, const char* filepath, GLenum format, bool nearest);
 	~Texture();
 
 	void Bind() const;

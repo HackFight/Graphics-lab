@@ -1,11 +1,11 @@
 #include "primitives/ebo.h"
 
-EBO::EBO(GLuint count, const GLushort* data)
-	: m_indicesCount(count)
+EBO::EBO(std::vector<GLuint>& indices)
+	: m_indicesCount(indices.size() * sizeof(GLuint))
 {
 	glGenBuffers(1, &m_rendererID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_rendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(GLuint), data, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indicesCount * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 }
 
 EBO::~EBO()

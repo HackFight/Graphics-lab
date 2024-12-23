@@ -1,7 +1,8 @@
 #include "primitives/texture.h"
 
-Texture::Texture(GLenum texture, const char* filepath, GLenum format, bool nearest)
-	: m_texture(texture)
+Texture::Texture(GLenum texture, const char* type, const char* filepath, GLenum format, bool nearest):
+	m_texture(texture),
+	m_type(type)
 {
 	glGenTextures(1, &m_rendererID);
 	glActiveTexture(m_texture);

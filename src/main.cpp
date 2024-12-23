@@ -26,21 +26,7 @@
 #include <primitives/materials.h>
 #include <renderer.h>
 #include <camera.h>
-
-//##### - STRUCTS - #####//
-struct DirLight
-{
-	bool enabled = true;
-	glm::vec3 direction = glm::vec3(0.0f, -1.0f, 1.0f);
-	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-};
-
-struct PointLight
-{
-	bool enabled = true;
-	glm::vec3 position = glm::vec3(0.0f, 5.0f, 0.0f);
-	glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-};
+#include <lights.h>
 
 //##### - GENERAL VARIABLES - #####//
 Camera camera;
@@ -200,146 +186,88 @@ int main(void)
 
 
 
-		//##### - DATA - #####//
-		//##### - Square
-		ShapeData square = ShapeGenerator::MakeSquare();
-
-		VAO squareVao;
-		VBO squareVbo(square.GetVertexBufferSize(), square.vertices);
-		VBOLayout squareVboL;
-		squareVboL.Push<GLfloat>(3);	//Set position attrib
-		squareVboL.Push<GLfloat>(2);	//Set UV attrib
-		squareVboL.Push<GLfloat>(3);	//Set normals attrib
-		squareVboL.Push<GLfloat>(3);	//Set color attrib
-
-		squareVao.AddBuffer(squareVbo, squareVboL, 0);
-
-		EBO squareEbo(square.GetIndexBufferCount(), square.indices);
-
-		//##### - Cleanup
-		square.CleanUp();
-
-		squareVao.Unbind();
-		squareVbo.Unbind();
-		squareEbo.Unbind();
-
-		//##### - Plane
-		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
-
-		VAO planeVao;
-		VBO planeVbo(plane.GetVertexBufferSize(), plane.vertices);
-		VBOLayout planeVboL;
-		planeVboL.Push<GLfloat>(3);	//Set position attrib
-		planeVboL.Push<GLfloat>(2);	//Set UV attrib
-		planeVboL.Push<GLfloat>(3);	//Set normals attrib
-		planeVboL.Push<GLfloat>(3);	//Set color attrib
-
-		planeVao.AddBuffer(planeVbo, planeVboL, 0);
-
-		EBO planeEbo(plane.GetIndexBufferCount(), plane.indices);
-
-		//##### - Cleanup
-		plane.CleanUp();
-
-		planeVao.Unbind();
-		planeVbo.Unbind();
-		planeEbo.Unbind();
-
-		//##### - Cube
-		ShapeData cube = ShapeGenerator::MakeCube();
-
-		VAO cubeVao;
-		VBO cubeVbo(cube.GetVertexBufferSize(), cube.vertices);
-		VBOLayout cubeVboL;
-		cubeVboL.Push<GLfloat>(3);	//Set position attrib
-		cubeVboL.Push<GLfloat>(2);	//Set UV attrib
-		cubeVboL.Push<GLfloat>(3);	//Set normals attrib
-		cubeVboL.Push<GLfloat>(3);	//Set color attrib
-
-		cubeVao.AddBuffer(cubeVbo, cubeVboL, 0);
-
-		EBO cubeEbo(cube.GetIndexBufferCount(), cube.indices);
-
-		//##### - Cleanup
-		cube.CleanUp();
-
-		cubeVao.Unbind();
-		cubeVbo.Unbind();
-		cubeEbo.Unbind();
-
-
-
 		//##### - RENDERER - #####//
 		Renderer renderer;
 
 
 
-		//##### - SHADERS - #####//
-		Shader sDebugColor(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/default.frag");
-		Shader sUV(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/UV.frag");
-		Shader sLight(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/color.frag");
-		Shader sTexture(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texture.frag");
-		Shader sPhong(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
-		Shader sTexturePhong(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texturePhong.frag");
-
-
-
 		//##### - TEXTURES - #####//
-		Texture tBlack(GL_TEXTURE2, RESOURCES_PATH "textures/black.png", GL_RGBA, true);
+		Texture jinxCubeTextures[] =
+		{
+			Texture(GL_TEXTURE0, "diffuse", RESOURCES_PATH "textures/container.png", GL_RGBA, false),
+			Texture(GL_TEXTURE1, "specular", RESOURCES_PATH "textures/container_specular.png", GL_RGBA, false),
+			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/container_emission.png", GL_RGB, false)
+		};
 
-		Texture tColor(GL_TEXTURE0, RESOURCES_PATH "textures/container.png", GL_RGBA, false);
-		Texture tSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/container_specular.png", GL_RGBA, false);
-		Texture tEmission(GL_TEXTURE2, RESOURCES_PATH "textures/container_emission.png", GL_RGB, false);
+		Texture groundTilesTextures[] =
+		{
+			Texture(GL_TEXTURE0, "diffuse", RESOURCES_PATH "textures/tiles.png", GL_RGBA, true),
+			Texture(GL_TEXTURE1, "specular", RESOURCES_PATH "textures/tiles_specular.png", GL_RGBA, true),
+			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/black.png", GL_RGB, true)
+		};
 
-		Texture tilesColor(GL_TEXTURE0, RESOURCES_PATH "textures/tiles.png", GL_RGBA, true);
-		Texture tilesSpecular(GL_TEXTURE1, RESOURCES_PATH "textures/tiles_specular.png", GL_RGBA, true);
-		
-		
-		
+
+
+		//##### - MESHES - #####//
+		ShapeData cube = ShapeGenerator::MakeCube();
+		std::vector<Vertex> verts(cube.vertices, cube.vertices + sizeof(*cube.vertices) / sizeof(Vertex));
+		std::vector<GLuint> ind(cube.indices, cube.indices + sizeof(*cube.indices) / sizeof(GLuint));
+		std::vector<Texture> tex(jinxCubeTextures, jinxCubeTextures + sizeof(jinxCubeTextures) / sizeof(Texture));
+		Mesh jinxCube(verts, ind, tex);
+
+		Mesh lightCube(verts, ind, tex);	//Same vertices and indices for the light, the textures are a placeholder
+
+		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
+		verts = std::vector<Vertex>(plane.vertices, plane.vertices + sizeof(*plane.vertices) / sizeof(Vertex));
+		ind = std::vector<GLuint>(plane.indices, plane.indices + sizeof(*plane.indices) / sizeof(GLuint));
+		tex = std::vector<Texture>(groundTilesTextures, groundTilesTextures + sizeof(groundTilesTextures) / sizeof(Texture));
+		Mesh groundTiles(verts, ind, tex);
+
+
+
+		//##### - SHADERS - #####//
+		Shader debugColorShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/default.frag");
+		Shader UVShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/UV.frag");
+		Shader unlitShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/color.frag");
+		Shader unlitTextureShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texture.frag");
+		Shader phongShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/phong.frag");
+		Shader texturePhongShader(RESOURCES_PATH "shaders/default.vert", RESOURCES_PATH "shaders/texturePhong.frag");
+
+
+
 		//##### - MATERIALS - #####//
-		PhongTextureMaterial jinxCubeMat;
-		jinxCubeMat.shader = &sTexturePhong;
-		jinxCubeMat.colorTexID = tColor.GetID();
-		jinxCubeMat.specularTexID = tSpecular.GetID();
-		jinxCubeMat.emissionTexID = tEmission.GetID();
+		Material jinxCubeMat;
+		jinxCubeMat.shader = &texturePhongShader;
 
-		PhongTextureMaterial tilesMat;
-		tilesMat.shader = &sTexturePhong;
-		tilesMat.colorTexID = tilesColor.GetID();
-		tilesMat.specularTexID = tilesSpecular.GetID();
-		tilesMat.emissionTexID = tBlack.GetID();
-
-		PhongMaterial groundMaterial;
-		groundMaterial.shader = &sPhong;
-		groundMaterial.diffuse = planeColor;
-
-		TextureMaterial containerTextureMat;
-		containerTextureMat.shader = &sTexture;
-
-		TextureMaterial tilesTextureMat;
-		tilesTextureMat.shader = &sTexture;
+		Material tilesMat;
+		tilesMat.shader = &texturePhongShader;
 
 		UnlitMaterial defaultMat;
-		defaultMat.shader = &sLight;
+		defaultMat.shader = &unlitShader;
 		defaultMat.color = glm::vec3(1.0f, 0.0f, 1.0f);
+
+		Material debugMat;
+		debugMat.shader = &debugColorShader;
 
 
 
 		//##### - Cleanup
-		sLight.Unbind();
-		sUV.Unbind();
-		sPhong.Unbind();
-		sDebugColor.Unbind();
+		debugColorShader.Unbind(); //Unbinding one shader unbinds them all
 
-		tColor.Unbind();
-		tSpecular.Unbind();
-		tEmission.Unbind();
+		for each(Texture texture in jinxCubeTextures) //Not for textures though... this is still very useless.
+		{
+			texture.Unbind();
+		}
+		for each(Texture texture in groundTilesTextures)
+		{
+			texture.Unbind();
+		}
 
 
 
 		//##### - LIGHTS - #####//
 		DirLight dirLight;
-		dirLight.enabled = false;
+		dirLight.enabled = true;
 		dirLight.direction = glm::vec3(0.2f, -1.0f, -0.5f);
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -363,7 +291,7 @@ int main(void)
 			renderer.Clear();
 			renderer.Update(winWidth, winHeight, camera);
 
-			if(wireframe)
+			if (wireframe)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			else
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -390,172 +318,92 @@ int main(void)
 			model1 = glm::translate(model1, cubePos);
 			model3 = glm::translate(model3, planePos);
 
+
 			//##### - Rendering
+			phongShader.Bind();
+			phongShader.SetUniform3fv("viewPos", camera.position);
+
+			phongShader.SetUniform1b("dirLight.enabled", dirLight.enabled);
+			phongShader.SetUniform3fv("dirLight.direction", dirLight.direction);
+			phongShader.SetUniform3fv("dirLight.ambient", dirLight.color * 0.2f);
+			phongShader.SetUniform3fv("dirLight.diffuse", dirLight.color * 0.5f);
+			phongShader.SetUniform3fv("dirLight.specular", dirLight.color * 1.0f);
+
+			for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+			{
+				phongShader.SetUniform1b("pointLights[" + std::to_string(i) + "].enabled", pointLights[i].enabled);
+				phongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].position", pointLights[i].position);
+				phongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].color * 0.2f);
+				phongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].color * 0.5f);
+				phongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].specular", pointLights[i].color * 1.0f);
+				phongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+				phongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].linear", 0.09f);
+				phongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
+			}
+
+			texturePhongShader.Bind();
+			texturePhongShader.SetUniform3fv("viewPos", camera.position);
+
+			texturePhongShader.SetUniform1b("dirLight.enabled", dirLight.enabled);
+			texturePhongShader.SetUniform3fv("dirLight.direction", dirLight.direction);
+			texturePhongShader.SetUniform3fv("dirLight.ambient", dirLight.color * 0.2f);
+			texturePhongShader.SetUniform3fv("dirLight.diffuse", dirLight.color * 0.5f);
+			texturePhongShader.SetUniform3fv("dirLight.specular", dirLight.color * 1.0f);
+
+			for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+			{
+				texturePhongShader.SetUniform1b("pointLights[" + std::to_string(i) + "].enabled", pointLights[i].enabled);
+				texturePhongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].position", pointLights[i].position);
+				texturePhongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].color * 0.2f);
+				texturePhongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].color * 0.5f);
+				texturePhongShader.SetUniform3fv("pointLights[" + std::to_string(i) + "].specular", pointLights[i].color * 1.0f);
+				texturePhongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].constant", 1.0f);
+				texturePhongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].linear", 0.09f);
+				texturePhongShader.SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
+			}
+
+
+			//Render jinx cube
 			if (current_shader == 0)
 			{
-				sDebugColor.Bind();
-
-				//Render cube
-				sDebugColor.SetUniformMatrix4fv("model", model1);
-				renderer.Draw(cubeVao, cubeEbo, sDebugColor);
-
-				//Render lights
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					if (pointLights[i].enabled)
-					{
-						lightModel = glm::mat4(1.0f);
-						lightModel = glm::translate(lightModel, pointLights[i].position);
-						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
-						sDebugColor.SetUniformMatrix4fv("model", lightModel);
-						renderer.Draw(cubeVao, cubeEbo, sDebugColor);
-					}
-				}
-
-				//Render plane
-				sDebugColor.SetUniformMatrix4fv("model", model3);
-				renderer.Draw(planeVao, planeEbo, sDebugColor);
+				debugMat.Bind();
+				debugMat.shader->SetUniformMatrix4fv("model", model1);
+				renderer.DrawMesh(jinxCube, debugMat);
 			}
 			else if (current_shader == 1)
 			{
-				sUV.Bind();
-
-				//Render cube
-				sUV.SetUniformMatrix4fv("model", model1);
-				renderer.Draw(cubeVao, cubeEbo, sUV);
-
-				//Render lights
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					if (pointLights[i].enabled)
-					{
-						lightModel = glm::mat4(1.0f);
-						lightModel = glm::translate(lightModel, pointLights[i].position);
-						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
-						sUV.SetUniformMatrix4fv("model", lightModel);
-						renderer.Draw(cubeVao, cubeEbo, sUV);
-					}
-				}
-
-				//Render plane
-				sUV.SetUniformMatrix4fv("model", model3);
-				renderer.Draw(planeVao, planeEbo, sUV);
 			}
 			else if (current_shader == 2)
 			{
-				//Set cube texture
-				if (current_texture == 0)
-				{
-					containerTextureMat.textureID = tColor.GetID();
-					tilesTextureMat.textureID = tilesColor.GetID();
-				}
-				else if (current_texture == 1)
-				{
-					containerTextureMat.textureID = tSpecular.GetID();
-					tilesTextureMat.textureID = tilesSpecular.GetID();
-				}
-				else if (current_texture == 2)
-				{
-					containerTextureMat.textureID = tEmission.GetID();
-					tilesTextureMat.textureID = tBlack.GetID();
-				}
-
-				//Render cube
-				containerTextureMat.Bind();
-				sTexture.SetUniformMatrix4fv("model", model1);
-				renderer.DrawMaterial(cubeVao, cubeEbo, containerTextureMat);
-
-				//Render lights
-				defaultMat.Bind();
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					if (pointLights[i].enabled)
-					{
-						lightModel = glm::mat4(1.0f);
-						lightModel = glm::translate(lightModel, pointLights[i].position);
-						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
-						sLight.SetUniformMatrix4fv("model", lightModel);
-						renderer.DrawMaterial(cubeVao, cubeEbo, defaultMat);
-					}
-				}
-
-				//Render plane
-				tilesTextureMat.Bind();
-				sTexture.SetUniformMatrix4fv("model", model3);
-				renderer.DrawMaterial(planeVao, planeEbo, tilesTextureMat);
 			}
 			else if (current_shader == 3)
 			{
-				sPhong.Bind();
-				sPhong.SetUniform3fv("viewPos", camera.position);
-
-				sPhong.SetUniform1b("dirLight.enabled", dirLight.enabled);
-				sPhong.SetUniform3fv("dirLight.direction", dirLight.direction);
-				sPhong.SetUniform3fv("dirLight.ambient", dirLight.color * 0.2f);
-				sPhong.SetUniform3fv("dirLight.diffuse", dirLight.color * 0.5f);
-				sPhong.SetUniform3fv("dirLight.specular", dirLight.color * 1.0f);
-
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					sPhong.SetUniform1b("pointLights[" + std::to_string(i) + "].enabled", pointLights[i].enabled);
-					sPhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].position", pointLights[i].position);
-					sPhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].color * 0.2f);
-					sPhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].color * 0.5f);
-					sPhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].specular", pointLights[i].color * 1.0f);
-					sPhong.SetUniform1f("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-					sPhong.SetUniform1f("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-					sPhong.SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
-				}
-
-				sTexturePhong.Bind();
-				sTexturePhong.SetUniform3fv("viewPos", camera.position);
-
-				sTexturePhong.SetUniform1b("dirLight.enabled", dirLight.enabled);
-				sTexturePhong.SetUniform3fv("dirLight.direction", dirLight.direction);
-				sTexturePhong.SetUniform3fv("dirLight.ambient", dirLight.color * 0.2f);
-				sTexturePhong.SetUniform3fv("dirLight.diffuse", dirLight.color * 0.5f);
-				sTexturePhong.SetUniform3fv("dirLight.specular", dirLight.color * 1.0f);
-
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					sTexturePhong.SetUniform1b("pointLights[" + std::to_string(i) + "].enabled", pointLights[i].enabled);
-					sTexturePhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].position", pointLights[i].position);
-					sTexturePhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].ambient", pointLights[i].color * 0.2f);
-					sTexturePhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i].color * 0.5f);
-					sTexturePhong.SetUniform3fv("pointLights[" + std::to_string(i) + "].specular", pointLights[i].color * 1.0f);
-					sTexturePhong.SetUniform1f("pointLights[" + std::to_string(i) + "].constant", 1.0f);
-					sTexturePhong.SetUniform1f("pointLights[" + std::to_string(i) + "].linear", 0.09f);
-					sTexturePhong.SetUniform1f("pointLights[" + std::to_string(i) + "].quadratic", 0.032f);
-				}
-
-
-				//Render jinx cube
 				jinxCubeMat.Bind();
-				sTexturePhong.SetUniformMatrix4fv("model", model1);
-				renderer.DrawMaterial(cubeVao, cubeEbo, jinxCubeMat);
-
-
-				//Render lights
-				sLight.Bind();
-				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-				{
-					if (pointLights[i].enabled)
-					{
-						lightModel = glm::mat4(1.0f);
-						lightModel = glm::translate(lightModel, pointLights[i].position);
-						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
-						sLight.SetUniformMatrix4fv("model", lightModel);
-						sLight.SetUniform3fv("color", pointLights[i].color);
-						renderer.Draw(cubeVao, cubeEbo, sLight);
-					}
-				}
-
-
-				//Render plane
-				tilesMat.Bind();
-				sTexturePhong.SetUniformMatrix4fv("model", model3);
-				renderer.DrawMaterial(planeVao, planeEbo, tilesMat);
+				jinxCubeMat.shader->SetUniformMatrix4fv("model", model1);
+				renderer.DrawMesh(jinxCube, jinxCubeMat);
 			}
+
+
+			/*//Render lights
+			for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+			{
+				if (pointLights[i].enabled)
+				{
+					lightModel = glm::mat4(1.0f);
+					lightModel = glm::translate(lightModel, pointLights[i].position);
+					lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+
+					defaultMat.Bind();
+					unlitShader.SetUniformMatrix4fv("model", lightModel);
+					renderer.DrawMesh(lightCube, defaultMat);
+				}
+			}*/
+
+
+			/*//Render plane
+			groundMat.Bind();
+			texturePhongShader.SetUniformMatrix4fv("model", model3);
+			renderer.DrawMesh(groundTiles, groundMat);*/
 
 
 			//##### - Debug
@@ -567,10 +415,11 @@ int main(void)
 
 				if (current_shader == 2)
 				{
-					const char* textures[] = { "Color", "Specular", "Emission"};
+					const char* textures[] = { "Color", "Specular", "Emission" };
 					ImGui::Combo("Texture", &current_texture, textures, sizeof(textures) / sizeof(*textures));
 				}
 			}
+
 			if (ImGui::CollapsingHeader("Lights"))
 			{
 				if (ImGui::TreeNode("Directional light"))
@@ -597,6 +446,7 @@ int main(void)
 					ImGui::TreePop();
 				}
 			}
+
 			if (ImGui::CollapsingHeader("Miscellaneous"))
 			{
 				ImGui::Checkbox("Wireframe", &wireframe);

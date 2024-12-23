@@ -1,5 +1,6 @@
 #ifndef EBO_CLASS
 #define EBO_CLASS
+#include <vector>
 #include <glad/glad.h>
 
 class EBO
@@ -9,7 +10,7 @@ private:
 	GLuint m_indicesCount;
 
 public:
-	EBO(GLuint count, const GLushort* data); //size in bytes, count in elements
+	EBO(std::vector<GLuint>& indices);
 	~EBO();
 
 	void Bind() const;

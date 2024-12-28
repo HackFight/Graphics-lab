@@ -1,6 +1,6 @@
 #include "primitives/mesh.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLuint> indices, std::vector<Texture> textures):
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLushort> indices, std::vector<Texture> textures):
 	m_vertices(vertices),
 	m_indices(indices),
 	m_textures(textures)

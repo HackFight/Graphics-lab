@@ -1,6 +1,6 @@
 #include "primitives/ebo.h"
 
-EBO::EBO(std::vector<GLuint>& indices)
+EBO::EBO(std::vector<GLushort>& indices)
 	: m_indicesCount(indices.size() * sizeof(GLuint))
 {
 	glGenBuffers(1, &m_rendererID);

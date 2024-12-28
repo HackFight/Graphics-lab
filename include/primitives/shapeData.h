@@ -15,6 +15,7 @@ struct ShapeData
 	GLuint numIndices;
 
 	GLsizeiptr GetVertexBufferSize() const { return numVertices * sizeof(Vertex); }
+	GLsizeiptr GetVertexBufferCount() const { return numVertices; }
 	GLsizeiptr GetIndexBufferCount() const { return numIndices; }
 
 	void CleanUp()

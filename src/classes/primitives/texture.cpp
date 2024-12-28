@@ -29,6 +29,8 @@ Texture::Texture(GLenum texture, const char* type, const char* filepath, GLenum 
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(imgBytes);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 Texture::~Texture()
@@ -44,6 +46,5 @@ void Texture::Bind() const
 
 void Texture::Unbind() const
 {
-	glActiveTexture(m_texture);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }

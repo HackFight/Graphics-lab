@@ -199,29 +199,31 @@ int main(void)
 			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/container_emission.png", GL_RGB, false)
 		};
 
-		Texture groundTilesTextures[] =
+		/*Texture groundTilesTextures[] =
 		{
 			Texture(GL_TEXTURE0, "diffuse", RESOURCES_PATH "textures/tiles.png", GL_RGBA, true),
 			Texture(GL_TEXTURE1, "specular", RESOURCES_PATH "textures/tiles_specular.png", GL_RGBA, true),
 			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/black.png", GL_RGB, true)
-		};
+		};*/
+
 
 
 
 		//##### - MESHES - #####//
 		ShapeData cube = ShapeGenerator::MakeCube();
-		std::vector<Vertex> verts(cube.vertices, cube.vertices + sizeof(*cube.vertices) / sizeof(Vertex));
-		std::vector<GLuint> ind(cube.indices, cube.indices + sizeof(*cube.indices) / sizeof(GLuint));
+
+		std::vector<Vertex> verts(cube.vertices, cube.vertices + cube.GetVertexBufferCount());
+		std::vector<GLushort> ind(cube.indices, cube.indices + cube.GetIndexBufferCount());
 		std::vector<Texture> tex(jinxCubeTextures, jinxCubeTextures + sizeof(jinxCubeTextures) / sizeof(Texture));
 		Mesh jinxCube(verts, ind, tex);
 
-		Mesh lightCube(verts, ind, tex);	//Same vertices and indices for the light, the textures are a placeholder
+		/*Mesh lightCube(verts, ind, tex);	//Same vertices and indices for the light, the textures are a placeholder
 
 		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
 		verts = std::vector<Vertex>(plane.vertices, plane.vertices + sizeof(*plane.vertices) / sizeof(Vertex));
-		ind = std::vector<GLuint>(plane.indices, plane.indices + sizeof(*plane.indices) / sizeof(GLuint));
+		ind = std::vector<GLushort>(plane.indices, plane.indices + sizeof(*plane.indices) / sizeof(GLuint));
 		tex = std::vector<Texture>(groundTilesTextures, groundTilesTextures + sizeof(groundTilesTextures) / sizeof(Texture));
-		Mesh groundTiles(verts, ind, tex);
+		Mesh groundTiles(verts, ind, tex);*/
 
 
 
@@ -253,15 +255,6 @@ int main(void)
 
 		//##### - Cleanup
 		debugColorShader.Unbind(); //Unbinding one shader unbinds them all
-
-		for each(Texture texture in jinxCubeTextures) //Not for textures though... this is still very useless.
-		{
-			texture.Unbind();
-		}
-		for each(Texture texture in groundTilesTextures)
-		{
-			texture.Unbind();
-		}
 
 
 
@@ -378,7 +371,7 @@ int main(void)
 			}
 			else if (current_shader == 3)
 			{
-				jinxCubeMat.Bind();
+				jinxCube.Bind();
 				jinxCubeMat.shader->SetUniformMatrix4fv("model", model1);
 				renderer.DrawMesh(jinxCube, jinxCubeMat);
 			}

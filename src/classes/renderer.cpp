@@ -55,7 +55,7 @@ void Renderer::DrawMesh(const Mesh& mesh, const Material& material) const
 		}
 		else
 		{
-			std::cout << "[WARNING]: Texture type doesn't exist!" << std::endl;
+			std::cout << "[WARNING]: Texture type \"" << type <<"\" doesn't exist!" << std::endl;
 		}
 
 		mesh.m_textures[i].Bind();

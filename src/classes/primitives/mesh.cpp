@@ -21,8 +21,3 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<GLushort> indices, std::vec
 	vbo.Unbind();
 	ebo.Unbind();
 }
-
-void Mesh::Bind()
-{
-	m_vao.Bind();
-}

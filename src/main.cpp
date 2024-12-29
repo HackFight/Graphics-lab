@@ -192,19 +192,18 @@ int main(void)
 
 
 		//##### - TEXTURES - #####//
-		Texture jinxCubeTextures[] =
-		{
+		Texture jinxCubeTextures[] = {
 			Texture(GL_TEXTURE0, "diffuse", RESOURCES_PATH "textures/container.png", GL_RGBA, false),
 			Texture(GL_TEXTURE1, "specular", RESOURCES_PATH "textures/container_specular.png", GL_RGBA, false),
 			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/container_emission.png", GL_RGB, false)
 		};
 
-		/*Texture groundTilesTextures[] =
+		Texture groundTilesTextures[] =
 		{
 			Texture(GL_TEXTURE0, "diffuse", RESOURCES_PATH "textures/tiles.png", GL_RGBA, true),
 			Texture(GL_TEXTURE1, "specular", RESOURCES_PATH "textures/tiles_specular.png", GL_RGBA, true),
-			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/black.png", GL_RGB, true)
-		};*/
+			Texture(GL_TEXTURE2, "emission", RESOURCES_PATH "textures/black.png", GL_RGBA, true)
+		};
 
 
 
@@ -217,13 +216,13 @@ int main(void)
 		std::vector<Texture> tex(jinxCubeTextures, jinxCubeTextures + sizeof(jinxCubeTextures) / sizeof(Texture));
 		Mesh jinxCube(verts, ind, tex);
 
-		/*Mesh lightCube(verts, ind, tex);	//Same vertices and indices for the light, the textures are a placeholder
+		Mesh lightCube(verts, ind, tex);	//Same vertices and indices for the light, the textures are a placeholder
 
 		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
-		verts = std::vector<Vertex>(plane.vertices, plane.vertices + sizeof(*plane.vertices) / sizeof(Vertex));
-		ind = std::vector<GLushort>(plane.indices, plane.indices + sizeof(*plane.indices) / sizeof(GLuint));
+		verts = std::vector<Vertex>(plane.vertices, plane.vertices + plane.GetVertexBufferCount());
+		ind = std::vector<GLushort>(plane.indices, plane.indices + plane.GetIndexBufferCount());
 		tex = std::vector<Texture>(groundTilesTextures, groundTilesTextures + sizeof(groundTilesTextures) / sizeof(Texture));
-		Mesh groundTiles(verts, ind, tex);*/
+		Mesh groundTiles(verts, ind, tex);
 
 
 
@@ -371,13 +370,13 @@ int main(void)
 			}
 			else if (current_shader == 3)
 			{
-				jinxCube.Bind();
+				jinxCubeMat.Bind();
 				jinxCubeMat.shader->SetUniformMatrix4fv("model", model1);
 				renderer.DrawMesh(jinxCube, jinxCubeMat);
 			}
 
 
-			/*//Render lights
+			//Render lights
 			for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
 			{
 				if (pointLights[i].enabled)
@@ -387,16 +386,16 @@ int main(void)
 					lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
 
 					defaultMat.Bind();
-					unlitShader.SetUniformMatrix4fv("model", lightModel);
+					defaultMat.shader->SetUniformMatrix4fv("model", lightModel);
 					renderer.DrawMesh(lightCube, defaultMat);
 				}
-			}*/
+			}
 
 
-			/*//Render plane
-			groundMat.Bind();
-			texturePhongShader.SetUniformMatrix4fv("model", model3);
-			renderer.DrawMesh(groundTiles, groundMat);*/
+			//Render plane
+			tilesMat.Bind();
+			tilesMat.shader->SetUniformMatrix4fv("model", model3);
+			renderer.DrawMesh(groundTiles, tilesMat);
 
 
 			//##### - Debug

@@ -13,15 +13,9 @@ public:
 	const char* m_type;
 
 	Texture(GLenum texture, const char* type, const char* filepath, GLenum format, bool nearest);
-	~Texture();
 
 	void Bind() const;
 	void Unbind() const;
-
-	GLuint GetID() const
-	{
-		return m_rendererID;
-	}
 };
 
 #endif

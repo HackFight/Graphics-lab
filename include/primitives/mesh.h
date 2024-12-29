@@ -18,8 +18,6 @@ public:
 
 	Mesh(std::vector<Vertex> vertices, std::vector<GLushort> indices, std::vector<Texture> textures);
 
-	void Bind();
-
 };
 
 #endif

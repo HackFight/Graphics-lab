@@ -33,11 +33,6 @@ Texture::Texture(GLenum texture, const char* type, const char* filepath, GLenum 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-Texture::~Texture()
-{
-	glDeleteTextures(1, &m_rendererID);
-}
-
 void Texture::Bind() const
 {
 	glActiveTexture(m_texture);

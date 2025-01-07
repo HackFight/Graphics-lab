@@ -1,25 +1,17 @@
 #define GLFW_INCLUDE_NONE
-#include <glad/glad.h>
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <iostream>
-#include <cerrno>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <openglErrorReporting.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <stb/stb_img.h>
+#include <openglErrorReporting.h>
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "imguiThemes.h"
 
-#include <primitives/vbo.h>
-#include <primitives/ebo.h>
-#include <primitives/vao.h>
 #include <primitives/shapeGenerator.h>
 #include <primitives/shader.h>
 #include <primitives/texture.h>
@@ -207,7 +199,6 @@ int main(void)
 
 
 
-
 		//##### - MESHES - #####//
 		ShapeData cube = ShapeGenerator::MakeCube();
 
@@ -247,19 +238,20 @@ int main(void)
 		defaultMat.shader = &unlitShader;
 		defaultMat.color = glm::vec3(1.0f, 0.0f, 1.0f);
 
+		Material debugTextureMat;
+		debugTextureMat.shader = &unlitTextureShader;
+
+		Material debugUVMat;
+		debugUVMat.shader = &UVShader;
+
 		Material debugMat;
 		debugMat.shader = &debugColorShader;
 
 
 
-		//##### - Cleanup
-		debugColorShader.Unbind(); //Unbinding one shader unbinds them all
-
-
-
 		//##### - LIGHTS - #####//
 		DirLight dirLight;
-		dirLight.enabled = true;
+		dirLight.enabled = false;
 		dirLight.direction = glm::vec3(0.2f, -1.0f, -0.5f);
 		dirLight.color = glm::vec3(1.0f, 1.0f, 1.0f);
 
@@ -294,7 +286,6 @@ int main(void)
 			ImGui::NewFrame();
 			ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 #pragma endregion
-
 
 			//##### - Inputs
 			float currentFrame = glfwGetTime();
@@ -355,47 +346,116 @@ int main(void)
 			}
 
 
-			//Render jinx cube
+
+			//Render
 			if (current_shader == 0)
 			{
+				//Render cube
 				debugMat.Bind();
 				debugMat.shader->SetUniformMatrix4fv("model", model1);
 				renderer.DrawMesh(jinxCube, debugMat);
+
+				//Render lights
+				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+				{
+					if (pointLights[i].enabled)
+					{
+						lightModel = glm::mat4(1.0f);
+						lightModel = glm::translate(lightModel, pointLights[i].position);
+						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+
+						debugMat.shader->SetUniformMatrix4fv("model", lightModel);
+						renderer.DrawMesh(lightCube, debugMat);
+					}
+				}
+
+				//Render plane
+				debugMat.shader->SetUniformMatrix4fv("model", model3);
+				renderer.DrawMesh(groundTiles, debugMat);
 			}
 			else if (current_shader == 1)
 			{
+				//Render cube
+				debugUVMat.Bind();
+				debugUVMat.shader->SetUniformMatrix4fv("model", model1);
+				renderer.DrawMesh(jinxCube, debugUVMat);
+
+				//Render lights
+				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+				{
+					if (pointLights[i].enabled)
+					{
+						lightModel = glm::mat4(1.0f);
+						lightModel = glm::translate(lightModel, pointLights[i].position);
+						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+
+						debugUVMat.shader->SetUniformMatrix4fv("model", lightModel);
+						renderer.DrawMesh(lightCube, debugUVMat);
+					}
+				}
+
+				//Render plane
+				debugUVMat.shader->SetUniformMatrix4fv("model", model3);
+				renderer.DrawMesh(groundTiles, debugUVMat);
 			}
 			else if (current_shader == 2)
 			{
+				//Render cube
+				debugTextureMat.Bind();
+				debugTextureMat.shader->SetUniform1i("tex0", current_texture);
+				debugTextureMat.shader->SetUniformMatrix4fv("model", model1);
+				renderer.DrawMesh(jinxCube, debugTextureMat);
+
+				//Render lights
+				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
+				{
+					if (pointLights[i].enabled)
+					{
+						lightModel = glm::mat4(1.0f);
+						lightModel = glm::translate(lightModel, pointLights[i].position);
+						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+
+						debugMat.shader->SetUniformMatrix4fv("model", lightModel);
+						renderer.DrawMesh(lightCube, debugMat);
+					}
+				}
+
+				//Render plane
+				debugTextureMat.Bind();
+				debugTextureMat.shader->SetUniform1i("tex0", current_texture);
+				debugTextureMat.shader->SetUniformMatrix4fv("model", model3);
+				renderer.DrawMesh(groundTiles, debugTextureMat);
 			}
 			else if (current_shader == 3)
 			{
+				//Render cube
 				jinxCubeMat.Bind();
 				jinxCubeMat.shader->SetUniformMatrix4fv("model", model1);
 				renderer.DrawMesh(jinxCube, jinxCubeMat);
-			}
 
-
-			//Render lights
-			for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
-			{
-				if (pointLights[i].enabled)
+				//Render lights
+				for (int i = 0; i < POINT_LIGHTS_NUMBER; i++)
 				{
-					lightModel = glm::mat4(1.0f);
-					lightModel = glm::translate(lightModel, pointLights[i].position);
-					lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
+					if (pointLights[i].enabled)
+					{
+						lightModel = glm::mat4(1.0f);
+						lightModel = glm::translate(lightModel, pointLights[i].position);
+						lightModel = glm::scale(lightModel, glm::vec3(0.1f, 0.1f, 0.1f));
 
-					defaultMat.Bind();
-					defaultMat.shader->SetUniformMatrix4fv("model", lightModel);
-					renderer.DrawMesh(lightCube, defaultMat);
+						defaultMat.Bind();
+						defaultMat.color = pointLights[i].color;
+						defaultMat.shader->SetUniformMatrix4fv("model", lightModel);
+						renderer.DrawMesh(lightCube, defaultMat);
+					}
 				}
+
+
+				//Render plane
+				tilesMat.Bind();
+				tilesMat.shader->SetUniformMatrix4fv("model", model3);
+				renderer.DrawMesh(groundTiles, tilesMat);
 			}
 
-
-			//Render plane
-			tilesMat.Bind();
-			tilesMat.shader->SetUniformMatrix4fv("model", model3);
-			renderer.DrawMesh(groundTiles, tilesMat);
 
 
 			//##### - Debug

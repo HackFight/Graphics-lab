@@ -1,7 +1,7 @@
 #ifndef TEXTURE_CLASS
 #define TEXTURE_CLASS
 #include <glad/glad.h>
-#include <stb/stb_img.h>
+#include <stb_image/stb_image.h>
 
 class Texture
 {

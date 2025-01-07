@@ -58,6 +58,22 @@ void Shader::LinkShader()
 	glDeleteShader(m_fragmentShaderID);
 }
 
+std::string Shader::get_file_contents(const char* filename) const
+{
+	std::ifstream in(filename, std::ios::binary);
+	if (in)
+	{
+		std::string contents;
+		in.seekg(0, std::ios::end);
+		contents.resize(in.tellg());
+		in.seekg(0, std::ios::beg);
+		in.read(&contents[0], contents.size());
+		in.close();
+		return(contents);
+	}
+	throw(errno);
+}
+
 GLint Shader::GetUniformLocation(const std::string& name) 
 {
 	if (m_uniformLocationCache.find(name) != m_uniformLocationCache.end())
@@ -73,22 +89,6 @@ GLint Shader::GetUniformLocation(const std::string& name)
 
 	m_uniformLocationCache[name] = location;
 	return location;
-}
-
-std::string Shader::get_file_contents(const char* filename) const
-{
-	std::ifstream in(filename, std::ios::binary);
-	if (in)
-	{
-		std::string contents;
-		in.seekg(0, std::ios::end);
-		contents.resize(in.tellg());
-		in.seekg(0, std::ios::beg);
-		in.read(&contents[0], contents.size());
-		in.close();
-		return(contents);
-	}
-	throw(errno);
 }
 
 void Shader::SetUniform1f(const std::string& name, float value)

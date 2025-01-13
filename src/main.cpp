@@ -203,7 +203,7 @@ int main(void)
 		ShapeData cube = ShapeGenerator::MakeCube();
 
 		std::vector<Vertex> verts(cube.vertices, cube.vertices + cube.GetVertexBufferCount());
-		std::vector<GLushort> ind(cube.indices, cube.indices + cube.GetIndexBufferCount());
+		std::vector<GLuint> ind(cube.indices, cube.indices + cube.GetIndexBufferCount());
 		std::vector<Texture> tex(jinxCubeTextures, jinxCubeTextures + sizeof(jinxCubeTextures) / sizeof(Texture));
 		Mesh jinxCube(verts, ind, tex);
 
@@ -211,7 +211,7 @@ int main(void)
 
 		ShapeData plane = ShapeGenerator::MakePlane(100, 100.0f);
 		verts = std::vector<Vertex>(plane.vertices, plane.vertices + plane.GetVertexBufferCount());
-		ind = std::vector<GLushort>(plane.indices, plane.indices + plane.GetIndexBufferCount());
+		ind = std::vector<GLuint>(plane.indices, plane.indices + plane.GetIndexBufferCount());
 		tex = std::vector<Texture>(groundTilesTextures, groundTilesTextures + sizeof(groundTilesTextures) / sizeof(Texture));
 		Mesh groundTiles(verts, ind, tex);
 

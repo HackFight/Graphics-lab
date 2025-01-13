@@ -11,6 +11,7 @@ private:
 
 public:
 	const char* m_type;
+	GLuint getID() { return m_rendererID; };
 
 	Texture(GLenum texture, const char* type, const char* filepath, GLenum format, bool nearest);
 

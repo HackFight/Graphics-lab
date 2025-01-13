@@ -15,9 +15,9 @@ ShapeData ShapeGenerator::MakeTriangle()
 	ret.vertices = new Vertex[ret.numVertices];
 	memcpy(ret.vertices, verts, sizeof(verts));
 
-	GLushort indices[] = { 0, 1, 2 };
+	GLuint indices[] = { 0, 1, 2 };
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
-	ret.indices = new GLushort[ret.numIndices];
+	ret.indices = new GLuint[ret.numIndices];
 	memcpy(ret.indices, indices, sizeof(indices));
 
 	return ret;
@@ -38,13 +38,13 @@ ShapeData ShapeGenerator::MakeSquare()
 	ret.vertices = new Vertex[ret.numVertices];
 	memcpy(ret.vertices, verts, sizeof(verts));
 
-	GLushort indices[] =
+	GLuint indices[] =
 	{ 
 		0, 1, 2,
 		0, 2, 3
 	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
-	ret.indices = new GLushort[ret.numIndices];
+	ret.indices = new GLuint[ret.numIndices];
 	memcpy(ret.indices, indices, sizeof(indices));
 
 	return ret;
@@ -90,7 +90,7 @@ ShapeData ShapeGenerator::MakeCube()
 	ret.vertices = new Vertex[ret.numVertices];
 	memcpy(ret.vertices, verts, sizeof(verts));
 
-	GLushort indices[] =
+	GLuint indices[] =
 	{
 		 0,  1,  2,		//Front face
 		 0,  2,  3,
@@ -111,7 +111,7 @@ ShapeData ShapeGenerator::MakeCube()
 		20, 22, 23
 	};
 	ret.numIndices = NUM_ARRAY_ELEMENTS(indices);
-	ret.indices = new GLushort[ret.numIndices];
+	ret.indices = new GLuint[ret.numIndices];
 	memcpy(ret.indices, indices, sizeof(indices));
 
 	return ret;
@@ -141,7 +141,7 @@ ShapeData ShapeGenerator::MakePlane(unsigned int divisions, float width)
 	}
 
 	ret.numIndices = (divisions * divisions) * 2 * 3;
-	ret.indices = new unsigned short[ret.numIndices];
+	ret.indices = new GLuint[ret.numIndices];
 	int runner = 0;
 	for (unsigned int y = 0; y < divisions; y++)
 	{

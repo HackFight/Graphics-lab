@@ -18,7 +18,7 @@ void Renderer::Draw(const VAO& vao, GLuint indicesCount, Shader& shader) const
 	shader.Bind();
 	shader.SetUniformMatrix4fv("proj", m_projectionMatrix);
 	shader.SetUniformMatrix4fv("view", m_viewMatrix);
-	glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
 }
 
 void Renderer::DrawMaterial(const VAO& vao, GLuint indicesCount, const Material& material) const
@@ -27,7 +27,7 @@ void Renderer::DrawMaterial(const VAO& vao, GLuint indicesCount, const Material&
 	material.Bind();
 	material.shader->SetUniformMatrix4fv("proj", m_projectionMatrix);
 	material.shader->SetUniformMatrix4fv("view", m_viewMatrix);
-	glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, indicesCount, GL_UNSIGNED_INT, 0);
 }
 
 void Renderer::DrawMesh(const Mesh& mesh, const Material& material) const
@@ -66,5 +66,5 @@ void Renderer::DrawMesh(const Mesh& mesh, const Material& material) const
 	material.shader->SetUniformMatrix4fv("proj", m_projectionMatrix);
 	material.shader->SetUniformMatrix4fv("view", m_viewMatrix);
 
-	glDrawElements(GL_TRIANGLES, mesh.m_indices.size(), GL_UNSIGNED_SHORT, 0);
+	glDrawElements(GL_TRIANGLES, mesh.m_indices.size(), GL_UNSIGNED_INT, 0);
 }

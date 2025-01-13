@@ -10,7 +10,7 @@ private:
 	GLuint m_indicesCount;
 
 public:
-	EBO(std::vector<GLushort>& indices);
+	EBO(std::vector<GLuint>& indices);
 	~EBO();
 
 	void Bind() const;

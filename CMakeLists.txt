@@ -32,6 +32,25 @@ set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(GLFW_INSTALL OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
+# Configure Assimp
+set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE) # Make sure zlib is enabled if you're linking against libzstd_static
+set(ASSIMP_BUILD_NO_EXCEPTIONS ON CACHE BOOL "" FORCE) 
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_OBJ_EXPORTER OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_MTL_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_MTL_EXPORTER OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTF_EXPORTER OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTFB_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_GLTFB_EXPORTER OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+add_definitions(-D_ITERATOR_DEBUG_LEVEL=0)
+option(ASSIMP_BUILD_STATIC_LIB "If the library shall be built as static library." ON)
+set(ASSIMP_BUILD_ZLIB "1" CACHE STRING "If zlib is used, static linking. Specify Zlib < 1.3")
+option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+
 
 add_subdirectory(thirdparty/glfw-3.3.2)			#window oppener
 add_subdirectory(thirdparty/glad)				#opengl loader
@@ -42,6 +61,7 @@ add_subdirectory(thirdparty/raudio)				#audio
 add_subdirectory(thirdparty/glm)				#math
 add_subdirectory(thirdparty/imgui-docking)		#ui
 add_subdirectory(thirdparty/gl2d)				#rendering
+add_subdirectory(thirdparty/assimp)				#asset importing
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
@@ -93,6 +113,6 @@ target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURC
 
 #enet not working yet on linux for some reason
 target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE glm glfw 
-	glad stb_image stb_truetype gl2d raudio imgui)
+	glad stb_image stb_truetype gl2d raudio imgui assimp)
 
 
